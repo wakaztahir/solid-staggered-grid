@@ -3,12 +3,7 @@ import {PositionedItem, StaggeredGridItemProps, StaggeredGridProps} from "./Stag
 import {createEffect, createSignal, JSX, mergeProps, onCleanup, onMount} from "solid-js";
 import {Dynamic} from "solid-js/web";
 
-const DefaultProps = {
-    spans: 1,
-    elementType: "div"
-}
-
-export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements>(props: StaggeredGridItemProps<T>) {
+export function useStaggeredGridItemProps(props: StaggeredGridItemProps): () => JSX.HTMLAttributes<HTMLElement> {
 
     const context = useStaggeredGrid()
 
@@ -73,12 +68,25 @@ export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements>(props: 
         }
     }
 
+    return () => ({
+
+        ...transform(),
+        onLoad  : reportData,
+        ref : props.itemHeight == null ? itemElementRef : undefined,
+
+
+    })
+
+}
+
+export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements>(props: StaggeredGridItemProps<T>) {
+
+    const itemProps = useStaggeredGridItemProps(props)
+
     return (
         <Dynamic
             component={props.elementType || "div"}
-            {...transform()}
-            ref={props.itemHeight == null ? itemElementRef : undefined}
-            onLoad={reportData}
+            {...itemProps()}
             children={props.children}
         />
     )

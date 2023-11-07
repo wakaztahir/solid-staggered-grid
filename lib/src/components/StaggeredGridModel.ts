@@ -1,4 +1,5 @@
-import {Accessor, JSX, JSXElement} from "solid-js";
+import {Accessor, ComponentProps, JSX, JSXElement, ValidComponent} from "solid-js";
+import {DynamicProps} from "solid-js/web";
 
 export enum StaggeredItemSpan {
     /** Occupy one column */
@@ -88,7 +89,11 @@ export interface StaggeredGridProps<T extends keyof JSX.IntrinsicElements = "div
 
 //Staggered Grid Item Model
 
-export interface StaggeredGridItemProps<T extends keyof JSX.IntrinsicElements = "div"> extends JSX.HTMLAttributes<T> {
+export type ElemProps<T extends ValidComponent, P = ComponentProps<T>> = {
+    [K in keyof P]: P[K];
+}
+
+export type StaggeredGridItemProps<T extends ValidComponent = "div"> = ElemProps<T> & {
     /** type of html element used , by default 'div' */
     elementType?: T,
     /** initial position of the item on the grid , default 0 for everything */

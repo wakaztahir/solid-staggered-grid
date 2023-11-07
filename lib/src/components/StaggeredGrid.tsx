@@ -26,12 +26,13 @@ const DefaultOptions = {
     requestAppendScrollTolerance: 20,
 }
 
-export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(props: StaggeredGridProps<T>) {
+export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(
+    gridElementRef : () => HTMLElement | undefined,
+    props: StaggeredGridProps<T>
+) {
 
     // state
     const [calculatedGridHeight, setCalculatedGridHeight] = createSignal<number>()
-
-    let gridElementRef: HTMLElement | undefined
 
     let repositionedOnce: boolean = false
     let gridWidth: number | undefined = undefined
@@ -69,10 +70,11 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
             return props.gridWidth
         } else {
             let count = getDefinedColsCount(props)
+            let ref = gridElementRef()
             if (count != null && props.columnWidth != null && !props.useElementWidth) {
                 return count * props.columnWidth
-            } else if (gridElementRef != null) {
-                const gw = gridElementRef.clientWidth
+            } else if (gridElementRef() != null) {
+                const gw = ref.clientWidth
                 if (gw == null || gw == 0) {
                     console.error("gridWidth is zero , gridWidth prop || css width property should be given to StaggeredGrid")
                     return 0
@@ -220,15 +222,16 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
     function onScroll() {
         const options = getOptions()
         if(!options) return
-        if (gridElementRef == null || calculatedGridHeight() == null) {
+        let ref = gridElementRef()
+        if (ref == null || calculatedGridHeight() == null) {
             if (!options.calculateHeight) {
                 console.warn("calculateHeight must be true for requestAppend to work !")
             }
             return
         }
-        const offset = gridElementRef.getBoundingClientRect().top - (gridElementRef.offsetParent?.getBoundingClientRect().top || 0);
+        const offset = ref.getBoundingClientRect().top - (ref.offsetParent?.getBoundingClientRect().top || 0);
         const top = (window.scrollY || window.pageYOffset) + window.innerHeight - offset;
-        if (top >= gridElementRef.scrollHeight - (options.requestAppendScrollTolerance || DefaultOptions.requestAppendScrollTolerance)) {
+        if (top >= ref.scrollHeight - (options.requestAppendScrollTolerance || DefaultOptions.requestAppendScrollTolerance)) {
             if (options.requestAppend != null) {
                 options.requestAppend()
             }
@@ -279,28 +282,6 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
         }
     }
 
-    function elementProps() {
-        const elementProps: any = {...props}
-        delete elementProps.elementType
-        delete elementProps.columnWidth
-        delete elementProps.columns
-        delete elementProps.alignment
-        delete elementProps.className
-        delete elementProps.children
-        delete elementProps.gridController
-        delete elementProps.style
-        delete elementProps.useElementWidth
-        delete elementProps.fitHorizontalGap
-        delete elementProps.gridWidth
-        delete elementProps.calculateHeight
-        delete elementProps.verticalGap
-        delete elementProps.horizontalGap
-        delete elementProps.repositionOnResize
-        delete elementProps.requestAppendScrollTolerance
-        delete elementProps.requestAppend
-        return elementProps
-    }
-
 
     // Lifecycle Functions
 
@@ -334,11 +315,49 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
         }
     })
 
+    return {
+
+        updateItem : updateItem,
+        removeItem : removeItem,
+        getHeightProp : getHeightProp
+
+    }
+
+}
+
+export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(props: StaggeredGridProps<T>) {
+
+    let gridElementRef: HTMLElement | undefined
+
+    const grid = createStaggeredGrid(() => gridElementRef, props)
+
+    function elementProps() {
+        const elementProps: any = {...props}
+        delete elementProps.elementType
+        delete elementProps.columnWidth
+        delete elementProps.columns
+        delete elementProps.alignment
+        delete elementProps.className
+        delete elementProps.children
+        delete elementProps.gridController
+        delete elementProps.style
+        delete elementProps.useElementWidth
+        delete elementProps.fitHorizontalGap
+        delete elementProps.gridWidth
+        delete elementProps.calculateHeight
+        delete elementProps.verticalGap
+        delete elementProps.horizontalGap
+        delete elementProps.repositionOnResize
+        delete elementProps.requestAppendScrollTolerance
+        delete elementProps.requestAppend
+        return elementProps
+    }
+
     return (
         <StaggeredGridContext.Provider
             value={{
-                updateItem: updateItem,
-                removeItem: removeItem,
+                updateItem: grid.updateItem,
+                removeItem: grid.removeItem,
             }}>
             <Dynamic
                 component={props.elementType || "div"}
@@ -346,7 +365,7 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
                 ref={gridElementRef}
                 style={{
                     position: "relative",
-                    ...getHeightProp(),
+                    ...grid.getHeightProp(),
                     ...props.style
                 }}
                 children={props.children}

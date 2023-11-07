@@ -1,13 +1,14 @@
 import {
+    createStaggeredGrid,
+    createStaggeredGridController,
     StaggeredAlignment,
-    StaggeredGrid,
+    StaggeredGridContext,
     StaggeredGridItem,
     StaggeredItemSpan,
-    StaggeredGridOptions, createStaggeredGridController
+    useStaggeredGridItemProps
 } from "solid-staggered-grid";
 
-import {Accessor, createEffect, createMemo, createSignal, For, onMount, Show, splitProps} from "solid-js";
-import {ErrorBoundary} from "solid-start";
+import {Accessor, createSignal, For, Show, splitProps} from "solid-js";
 
 type Item = {
     key: string,
@@ -85,6 +86,13 @@ function App() {
 
     let [itemsState, setItemsState] = createSignal<Item[]>(pushItems([], totalItems))
 
+    let gridElementRef: HTMLElement | undefined
+
+    const grid = createStaggeredGrid(() => gridElementRef, {
+        gridController : controller,
+        options : options
+    })
+
     return (
         <>
             <StaggeredOptions
@@ -119,46 +127,55 @@ function App() {
                 infiniteGrid={infiniteGrid}
                 setInfiniteGrid={setInfiniteGrid}
             />
-            <StaggeredGrid
-                gridController={controller}
-                options={options}
-                style={{background: "#e3e3e3", "margin-top": "1em"}}
-            >
-                <For each={itemsState()}>
-                    {(item, index) => (
-                        <StaggeredTestItem
-                            columnWidth={options().columnWidth}
-                            // images={images}
-                            index={index()}
-                            item={item}
-                            removeMe={(index: number) => {
-                                setItemsState((prevItems) => {
-                                    let newItems = [...prevItems]
-                                    newItems.splice(index, 1)
-                                    return newItems
-                                })
-                            }}
-                            updateMe={(index, newItem) => {
-                                setItemsState((prevItems) => {
-                                    let newItems = [...prevItems]
-                                    newItems[index] = newItem
-                                    return newItems
-                                })
-                            }}
-                            swapWithRandom={(index) => {
-                                const items = itemsState()
-                                let random = Math.floor(Math.random() * (items.length - 1));
-                                if (random > 0 && random < items.length) {
-                                    let newItems = [...items]
-                                    newItems[index] = newItems[random];
-                                    newItems[random] = items[index];
-                                    setItemsState(newItems);
-                                }
-                            }}
-                        />
-                    )}
-                </For>
-            </StaggeredGrid>
+            <StaggeredGridContext.Provider value={{
+                removeItem: grid.removeItem,
+                updateItem: grid.updateItem
+            }}>
+                <div
+                    ref={gridElementRef}
+                    style={{
+                        background: "#e3e3e3",
+                        "margin-top": "1em",
+                        "position" : "relative",
+                        ...grid.getHeightProp()
+                    }}
+                >
+                    <For each={itemsState()}>
+                        {(item, index) => (
+                            <StaggeredTestItem
+                                columnWidth={options().columnWidth}
+                                // images={images}
+                                index={index()}
+                                item={item}
+                                removeMe={(index: number) => {
+                                    setItemsState((prevItems) => {
+                                        let newItems = [...prevItems]
+                                        newItems.splice(index, 1)
+                                        return newItems
+                                    })
+                                }}
+                                updateMe={(index, newItem) => {
+                                    setItemsState((prevItems) => {
+                                        let newItems = [...prevItems]
+                                        newItems[index] = newItem
+                                        return newItems
+                                    })
+                                }}
+                                swapWithRandom={(index) => {
+                                    const items = itemsState()
+                                    let random = Math.floor(Math.random() * (items.length - 1));
+                                    if (random > 0 && random < items.length) {
+                                        let newItems = [...items]
+                                        newItems[index] = newItems[random];
+                                        newItems[random] = items[index];
+                                        setItemsState(newItems);
+                                    }
+                                }}
+                            />
+                        )}
+                    </For>
+                </div>
+            </StaggeredGridContext.Provider>
         </>
     )
 }
@@ -188,35 +205,42 @@ interface StaggeredTestItemProps {
 }
 
 function StaggeredTestItem(props: StaggeredTestItemProps) {
-    let {item, index} = props
+
     let [span, setSpan] = createSignal(props.item.span)
     let [height, setHeight] = createSignal(props.item.height)
 
+    const itemProps = useStaggeredGridItemProps({
+        index: props.index,
+        spans: span(),
+        itemHeight: height(),
+        style : {
+            transition : "top, left 0.3s ease"
+        }
+    })
+
     return (
-        <StaggeredGridItem
-            index={index}
-            spans={span()}
-            style={{transition: "left 0.3s ease,top 0.3s ease"}}
-            itemHeight={height()} // when not given , a ref is used to get element height
+        <div
+            {...itemProps()}
         >
-            <div style={{
-                width: "100%",
-                height: item.height + "px",
-                background: "skyblue",
-                "text-align": "center",
-                display: "flex",
-                "flex-direction": "column",
-                "align-items": "center",
-                "justify-content": "center"
-            }}>
-                Name : {item.name}
+            <div
+                style={{
+                    width: "100%",
+                    height: props.item.height + "px",
+                    background: "skyblue",
+                    "text-align": "center",
+                    display: "flex",
+                    "flex-direction": "column",
+                    "align-items": "center",
+                    "justify-content": "center"
+                }}>
+                Name : {props.item.name}
                 <div>Span : <input
                     style={{width: "4em"}}
                     type={"number"}
                     value={span()}
                     onChange={(e) => {
-                        item.span = parseInt(e.currentTarget.value)
-                        setSpan(item.span)
+                        props.item.span = parseInt(e.currentTarget.value)
+                        setSpan(props.item.span)
                     }}
                 /></div>
                 <div>Height : <input
@@ -224,8 +248,8 @@ function StaggeredTestItem(props: StaggeredTestItemProps) {
                     type={"number"}
                     value={height()}
                     onChange={(e) => {
-                        item.height = parseInt(e.currentTarget.value)
-                        setHeight(item.height)
+                        props.item.height = parseInt(e.currentTarget.value)
+                        setHeight(props.item.height)
                     }}
                 /></div>
                 <button onClick={() => props.removeMe(props.index)}>Remove Me</button>
@@ -237,7 +261,7 @@ function StaggeredTestItem(props: StaggeredTestItemProps) {
                 <button onClick={() => props.swapWithRandom(props.index)}>Swap Me
                 </button>
             </div>
-        </StaggeredGridItem>
+        </div>
     )
 }
 
