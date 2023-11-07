@@ -28,7 +28,6 @@ export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements>(props: 
                 left: x,
                 top: y,
             }
-            console.log("Previous " + position.width, position.left, position.top, "Next", NewPos)
             setState(NewPos)
         }
     }
@@ -39,14 +38,14 @@ export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements>(props: 
     function reportData() {
         if (props.itemHeight == null && itemElementRef == null) return
         context.updateItem(props.index, props.spans || 1, props.itemHeight || itemElementRef!.clientHeight, updateTranslate)
-        console.log("Reporting")
     }
 
     createEffect(reportData)
 
     onCleanup(() => context.removeItem(props.index))
 
-    function transform(itemPos: PositionedItem): JSX.HTMLAttributes<HTMLElement> {
+    function transform(): JSX.HTMLAttributes<HTMLElement> {
+        const itemPos = state()
         const elemProps: any = {...props}
         delete elemProps.elementType
         delete elemProps.initialPosition
@@ -74,18 +73,10 @@ export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements>(props: 
         }
     }
 
-    // return React.createElement(this.props.elementType, {
-    //     ...this.transform(this.state),
-    //     ref: this.props.itemHeight == null ? (element) => {
-    //         this.itemElementRef = element
-    //     } : undefined,
-    //     onLoad: this.reportData.bind(this)
-    // }, this.props.children)
-
     return (
         <Dynamic
             component={props.elementType || "div"}
-            {...transform(state())}
+            {...transform()}
             ref={props.itemHeight == null ? itemElementRef : undefined}
             onLoad={reportData}
             children={props.children}

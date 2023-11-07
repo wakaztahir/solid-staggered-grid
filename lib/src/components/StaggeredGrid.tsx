@@ -218,7 +218,8 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
     }
 
     function onScroll() {
-        const options = (props.options ? props.options() : undefined) || DefaultOptions
+        const options = getOptions()
+        if(!options) return
         if (gridElementRef == null || calculatedGridHeight() == null) {
             if (!options.calculateHeight) {
                 console.warn("calculateHeight must be true for requestAppend to work !")
@@ -315,9 +316,7 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
 
     createEffect(() => {
         const options = getOptions()
-        if(options) {
-            requestReposition(options)
-        }
+        options && requestReposition(options)
         if (props.gridController != null && !props.gridController.isRegistered) {
             registerController(props.gridController!);
         }

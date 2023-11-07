@@ -7,6 +7,7 @@ import {
 } from "solid-staggered-grid";
 
 import {Accessor, createEffect, createMemo, createSignal, For, onMount, Show, splitProps} from "solid-js";
+import {ErrorBoundary} from "solid-start";
 
 type Item = {
     key: string,
@@ -18,14 +19,8 @@ type Item = {
 
 function App() {
 
-    // const [alignment, setAlignment] = createSignal()
-    // const [columnWidth, setColumnWidth] = createSignal<number>(300)
-    // const [columns, setColumns] = createSignal<number>(0)
-    // const [horizontalGap, setHorizontalGap] = createSignal(10)
-    // const [verticalGap, setVerticalGap] = createSignal(10)
     const [images, setImages] = createSignal(false)
     const [multiSpan, setMultiSpan] = createSignal(false)
-    // const [fitHorizontalGap, setFitHorizontalGap] = createSignal(true)
     const [infiniteGrid, setInfiniteGrid] = createSignal(false)
 
     const [options, setOptions] = createSignal({
@@ -49,29 +44,31 @@ function App() {
     const totalItems = 20
 
     // calculating heights array for items
-    const randomHeights = createMemo(() => {
+    function randomHeights() {
         let heights: Array<number> = []
         for (let i = 0; i < totalItems; i++) {
             heights.push(Math.floor((Math.random() * 300) + 300))
         }
         return heights
-    }, [totalItems])
+    }
 
     // calculating spans for items
-    const randomSpans = createMemo(() => {
+    function randomSpans() {
         let spans: Array<number> = []
         for (let i = 0; i < totalItems; i++) {
             spans.push(Math.floor(Math.random() * 2) + 1)
         }
         return spans
-    }, [totalItems])
+    }
 
     function pushItems(items: Item[], total: number) {
         const length = items.length
+        const spans = randomSpans()
+        const heights = randomHeights()
         for (let i = 0; i < total; i++) {
             let span: number
             if (multiSpan()) {
-                span = randomSpans()[i]
+                span = spans[i]
             } else {
                 span = 1
             }
@@ -80,7 +77,7 @@ function App() {
                 name: "Item " + (i + length),
                 span: span,
                 width: span * options().columnWidth!,
-                height: randomHeights()[i],
+                height: heights[i],
             });
         }
         return items
@@ -133,35 +130,48 @@ function App() {
                 options={options}
                 style={{background: "#e3e3e3", "margin-top": "1em"}}
             >
+                <ErrorBoundary fallback={() => {
+                    return "shit another error"
+                }}>
                 <For each={itemsState()}>
                     {(item, index) => (
-                        <StaggeredTestItem
-                            columnWidth={options().columnWidth}
-                            // images={images}
-                            index={index()}
-                            item={item}
-                            removeMe={(index: number) => {
-                                let newItems = [...itemsState()]
-                                newItems.splice(index, 1)
-                                setItemsState(newItems)
-                            }}
-                            updateMe={(index, newItem) => {
-                                let newItems = [...itemsState()]
-                                newItems[index] = newItem
-                                setItemsState(newItems)
-                            }}
-                            swapWithRandom={(index) => {
-                                let random = Math.floor(Math.random() * (itemsState().length - 1));
-                                if (random > 0 && random < itemsState().length) {
-                                    let newItems = [...itemsState()]
-                                    newItems[index] = newItems[random];
-                                    newItems[random] = itemsState()[index];
-                                    setItemsState(newItems);
-                                }
-                            }}
-                        />
+                        <ErrorBoundary fallback={() => {
+                            return "shit error"
+                        }}>
+                            <StaggeredTestItem
+                                columnWidth={options().columnWidth}
+                                // images={images}
+                                index={index()}
+                                item={item}
+                                removeMe={(index: number) => {
+                                    setItemsState((prevItems) => {
+                                        let newItems = [...prevItems]
+                                        newItems.splice(index, 1)
+                                        return newItems
+                                    })
+                                }}
+                                updateMe={(index, newItem) => {
+                                    setItemsState((prevItems) => {
+                                        let newItems = [...prevItems]
+                                        newItems[index] = newItem
+                                        return newItems
+                                    })
+                                }}
+                                swapWithRandom={(index) => {
+                                    const items = itemsState()
+                                    let random = Math.floor(Math.random() * (items.length - 1));
+                                    if (random > 0 && random < items.length) {
+                                        let newItems = [...items]
+                                        newItems[index] = newItems[random];
+                                        newItems[random] = items[index];
+                                        setItemsState(newItems);
+                                    }
+                                }}
+                            />
+                        </ErrorBoundary>
                     )}
                 </For>
+                </ErrorBoundary>
             </StaggeredGrid>
         </>
     )
