@@ -4941,7 +4941,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"solid-js@npm:^1.6.6":
+"solid-js@npm:^1.8.5":
   version: 1.8.5
   resolution: "solid-js@npm:1.8.5"
   dependencies:
@@ -5086,7 +5086,7 @@ __metadata:
     "@types/node": ^18.11.17
     dotenv: ^16.0.3
     prettier: ^2.8.1
-    solid-js: ^1.6.6
+    solid-js: ^1.8.5
     solid-staggered-grid: "workspace:^"
     solid-start: ^0.2.8
     solid-start-node: ^0.2.8

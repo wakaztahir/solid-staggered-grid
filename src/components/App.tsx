@@ -83,13 +83,7 @@ function App() {
         return items
     }
 
-    function createInitialItems() {
-        let arr : Item[] = []
-        pushItems(arr, totalItems)
-        return arr
-    }
-
-    let [itemsState, setItemsState] = createSignal<Item[]>(createInitialItems())
+    let [itemsState, setItemsState] = createSignal<Item[]>(pushItems([], totalItems))
 
     return (
         <>
@@ -130,48 +124,40 @@ function App() {
                 options={options}
                 style={{background: "#e3e3e3", "margin-top": "1em"}}
             >
-                <ErrorBoundary fallback={() => {
-                    return "shit another error"
-                }}>
                 <For each={itemsState()}>
                     {(item, index) => (
-                        <ErrorBoundary fallback={() => {
-                            return "shit error"
-                        }}>
-                            <StaggeredTestItem
-                                columnWidth={options().columnWidth}
-                                // images={images}
-                                index={index()}
-                                item={item}
-                                removeMe={(index: number) => {
-                                    setItemsState((prevItems) => {
-                                        let newItems = [...prevItems]
-                                        newItems.splice(index, 1)
-                                        return newItems
-                                    })
-                                }}
-                                updateMe={(index, newItem) => {
-                                    setItemsState((prevItems) => {
-                                        let newItems = [...prevItems]
-                                        newItems[index] = newItem
-                                        return newItems
-                                    })
-                                }}
-                                swapWithRandom={(index) => {
-                                    const items = itemsState()
-                                    let random = Math.floor(Math.random() * (items.length - 1));
-                                    if (random > 0 && random < items.length) {
-                                        let newItems = [...items]
-                                        newItems[index] = newItems[random];
-                                        newItems[random] = items[index];
-                                        setItemsState(newItems);
-                                    }
-                                }}
-                            />
-                        </ErrorBoundary>
+                        <StaggeredTestItem
+                            columnWidth={options().columnWidth}
+                            // images={images}
+                            index={index()}
+                            item={item}
+                            removeMe={(index: number) => {
+                                setItemsState((prevItems) => {
+                                    let newItems = [...prevItems]
+                                    newItems.splice(index, 1)
+                                    return newItems
+                                })
+                            }}
+                            updateMe={(index, newItem) => {
+                                setItemsState((prevItems) => {
+                                    let newItems = [...prevItems]
+                                    newItems[index] = newItem
+                                    return newItems
+                                })
+                            }}
+                            swapWithRandom={(index) => {
+                                const items = itemsState()
+                                let random = Math.floor(Math.random() * (items.length - 1));
+                                if (random > 0 && random < items.length) {
+                                    let newItems = [...items]
+                                    newItems[index] = newItems[random];
+                                    newItems[random] = items[index];
+                                    setItemsState(newItems);
+                                }
+                            }}
+                        />
                     )}
                 </For>
-                </ErrorBoundary>
             </StaggeredGrid>
         </>
     )
