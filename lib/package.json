@@ -1,0 +1,38 @@
+{
+  "name": "solid-staggered-grid",
+  "version": "1.0.18",
+  "description": "Staggered Grid for Solid JS",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rimraf dist",
+    "build": "npm run clean && rollup -c"
+  },
+  "keywords": [
+    "solid",
+    "staggered",
+    "grid",
+    "masonry"
+  ],
+  "author": "Waqas Tahir",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wakaztahir/solid-staggered-grid.git"
+  },
+  "homepage": "https://wakaztahir.github.io/solid-staggered-grid",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.3.0",
+    "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-terser": "^7.0.2",
+    "typescript": "^5.2.2"
+  }
+}
