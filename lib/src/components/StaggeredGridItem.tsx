@@ -10,7 +10,6 @@ const DefaultProps = {
 
 export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements>(props: StaggeredGridItemProps<T>) {
 
-    const merged: Omit<StaggeredGridProps<T>, keyof typeof DefaultProps> & typeof DefaultProps = mergeProps(DefaultProps, props)
     const context = useStaggeredGrid()
 
     const [state, setState] = createSignal(props.initialPosition || {
@@ -24,11 +23,13 @@ export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements>(props: 
     function updateTranslate(width: number, x: number, y: number) {
         const position = state()
         if (position.width !== width || x !== position.left || y !== position.top) {
-            setState({
+            const NewPos = {
                 width: width,
                 left: x,
                 top: y,
-            })
+            }
+            console.log("Previous " + position.width, position.left, position.top, "Next", NewPos)
+            setState(NewPos)
         }
     }
 
@@ -37,17 +38,11 @@ export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements>(props: 
      */
     function reportData() {
         if (props.itemHeight == null && itemElementRef == null) return
-        context.updateItem(props.index, merged.spans, props.itemHeight || itemElementRef!.clientHeight, updateTranslate)
+        context.updateItem(props.index, props.spans || 1, props.itemHeight || itemElementRef!.clientHeight, updateTranslate)
+        console.log("Reporting")
     }
 
-    onMount(reportData)
-
-    createEffect(() => {
-        // TODO
-        // if (prevProps.itemHeight !== this.props.itemHeight || prevProps.index !== this.props.index || prevProps.spans !== this.props.spans || prevProps.children !== this.props.children) {
-        //     this.reportData();
-        // }
-    })
+    createEffect(reportData)
 
     onCleanup(() => context.removeItem(props.index))
 
@@ -89,7 +84,7 @@ export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements>(props: 
 
     return (
         <Dynamic
-            component={merged.elementType}
+            component={props.elementType || "div"}
             {...transform(state())}
             ref={props.itemHeight == null ? itemElementRef : undefined}
             onLoad={reportData}

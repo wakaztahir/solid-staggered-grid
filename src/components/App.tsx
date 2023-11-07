@@ -2,10 +2,11 @@ import {
     StaggeredAlignment,
     StaggeredGrid,
     StaggeredGridItem,
-    StaggeredItemSpan
+    StaggeredItemSpan,
+    StaggeredGridOptions, createStaggeredGridController
 } from "solid-staggered-grid";
 
-import {createEffect, createMemo, createSignal} from "solid-js";
+import {Accessor, createEffect, createMemo, createSignal, For, onMount, Show, splitProps} from "solid-js";
 
 type Item = {
     key: string,
@@ -17,15 +18,33 @@ type Item = {
 
 function App() {
 
-    const [alignment, setAlignment] = createSignal(StaggeredAlignment.Center)
-    const [columnWidth, setColumnWidth] = createSignal<number>(300)
-    const [columns, setColumns] = createSignal<number>(0)
-    const [horizontalGap, setHorizontalGap] = createSignal(10)
-    const [verticalGap, setVerticalGap] = createSignal(10)
+    // const [alignment, setAlignment] = createSignal()
+    // const [columnWidth, setColumnWidth] = createSignal<number>(300)
+    // const [columns, setColumns] = createSignal<number>(0)
+    // const [horizontalGap, setHorizontalGap] = createSignal(10)
+    // const [verticalGap, setVerticalGap] = createSignal(10)
     const [images, setImages] = createSignal(false)
     const [multiSpan, setMultiSpan] = createSignal(false)
-    const [fitHorizontalGap, setFitHorizontalGap] = createSignal(true)
+    // const [fitHorizontalGap, setFitHorizontalGap] = createSignal(true)
     const [infiniteGrid, setInfiniteGrid] = createSignal(false)
+
+    const [options, setOptions] = createSignal({
+        calculateHeight: true,
+        useElementWidth: true,
+        alignment: StaggeredAlignment.Center,
+        columnWidth: 300,
+        columns: 0,
+        horizontalGap: 10,
+        verticalGap: 10,
+        fitHorizontalGap: true,
+        requestAppend: () => {
+            if (infiniteGrid()) {
+                setItemsState(pushItems([...itemsState()], 10))
+            }
+        }
+    })
+
+    let controller = createStaggeredGridController()
 
     const totalItems = 20
 
@@ -39,7 +58,7 @@ function App() {
     }, [totalItems])
 
     // calculating spans for items
-    const randomSpans= createMemo(() => {
+    const randomSpans = createMemo(() => {
         let spans: Array<number> = []
         for (let i = 0; i < totalItems; i++) {
             spans.push(Math.floor(Math.random() * 2) + 1)
@@ -60,88 +79,105 @@ function App() {
                 key: "Item" + (i + length) + span,
                 name: "Item " + (i + length),
                 span: span,
-                width: span * columnWidth(),
+                width: span * options().columnWidth!,
                 height: randomHeights()[i],
             });
         }
         return items
     }
 
-    let [itemsState, setItemsState] = createSignal<Item[]>([])
+    function createInitialItems() {
+        let arr : Item[] = []
+        pushItems(arr, totalItems)
+        return arr
+    }
 
-    // creating items objects
-    createEffect(() => {
-        setItemsState(pushItems([], totalItems))
-    }, [totalItems, columnWidth, multiSpan, randomSpans, randomHeights])
+    let [itemsState, setItemsState] = createSignal<Item[]>(createInitialItems())
 
     return (
         <>
             <StaggeredOptions
-                alignment={alignment}
-                setAlignment={setAlignment}
-                columnWidth={columnWidth()}
-                setColumnWidth={setColumnWidth}
-                columns={columns()}
-                setColumns={setColumns}
-                horizontalGap={horizontalGap()}
-                setHorizontalGap={setHorizontalGap}
-                verticalGap={verticalGap()}
-                setVerticalGap={setVerticalGap}
-                fitHorizontalGap={fitHorizontalGap()}
-                setFitHorizontalGap={setFitHorizontalGap}
-                images={images()}
+                alignment={() => options().alignment}
+                setAlignment={(alignment) => {
+                    setOptions(o => ({...o, alignment}))
+                }}
+                columnWidth={() => options().columnWidth}
+                setColumnWidth={(columnWidth) => {
+                    setOptions(o => ({...o, columnWidth}))
+                }}
+                columns={() => options().columns}
+                setColumns={(columns) => {
+                    setOptions(o => ({...o, columns}))
+                }}
+                horizontalGap={() => options().horizontalGap}
+                setHorizontalGap={(horizontalGap) => {
+                    setOptions(o => ({...o, horizontalGap}))
+                }}
+                verticalGap={() => options().verticalGap}
+                setVerticalGap={(verticalGap) => {
+                    setOptions(o => ({...o, verticalGap}))
+                }}
+                fitHorizontalGap={() => options().fitHorizontalGap}
+                setFitHorizontalGap={(fitHorizontalGap) => {
+                    setOptions(o => ({...o, fitHorizontalGap}))
+                }}
+                images={images}
                 setImages={setImages}
-                multiSpan={multiSpan()}
+                multiSpan={multiSpan}
                 setMultiSpan={setMultiSpan}
-                infiniteGrid={infiniteGrid()}
+                infiniteGrid={infiniteGrid}
                 setInfiniteGrid={setInfiniteGrid}
             />
             <StaggeredGrid
-                alignment={alignment()}
-                columnWidth={columnWidth()}
-                columns={columns()}
-                style={{background: "#e3e3e3", marginTop: "1em"}}
-                useElementWidth={true}
-                horizontalGap={horizontalGap()}
-                verticalGap={verticalGap()}
-                fitHorizontalGap={fitHorizontalGap()}
-                repositionOnResize={true}
-                requestAppend={infiniteGrid() ? () => {
-                    setItemsState(pushItems([...itemsState()], 10))
-                } : undefined}
+                gridController={controller}
+                options={options}
+                style={{background: "#e3e3e3", "margin-top": "1em"}}
             >
-                {itemsState().map((item, index) => {
-                    const itemProps: StaggeredTestItemProps = {
-                        columnWidth : columnWidth(),
-                        index,
-                        item,
-                        removeMe: (index: number) => {
-                            let newItems = [...itemsState()]
-                            newItems.splice(index, 1)
-                            setItemsState(newItems)
-                        },
-                        updateMe: (index, newItem) => {
-                            let newItems = [...itemsState()]
-                            newItems[index] = newItem
-                            setItemsState(newItems)
-                        },
-                        swapWithRandom: (index) => {
-                            let random = Math.floor(Math.random() * (itemsState().length - 1));
-                            if (random > 0 && random < itemsState().length) {
+                <For each={itemsState()}>
+                    {(item, index) => (
+                        <StaggeredTestItem
+                            columnWidth={options().columnWidth}
+                            // images={images}
+                            index={index()}
+                            item={item}
+                            removeMe={(index: number) => {
                                 let newItems = [...itemsState()]
-                                newItems[index] = newItems[random];
-                                newItems[random] = itemsState()[index];
-                                setItemsState(newItems);
-                            }
-                        }
-                    }
-                    return (images() ? (
-                        <StaggeredImageItem key={item.key} {...itemProps}/>
-                    ) : (
-                        <StaggeredTestItem key={item.key} {...itemProps} />
-                    ))
-                })}
+                                newItems.splice(index, 1)
+                                setItemsState(newItems)
+                            }}
+                            updateMe={(index, newItem) => {
+                                let newItems = [...itemsState()]
+                                newItems[index] = newItem
+                                setItemsState(newItems)
+                            }}
+                            swapWithRandom={(index) => {
+                                let random = Math.floor(Math.random() * (itemsState().length - 1));
+                                if (random > 0 && random < itemsState().length) {
+                                    let newItems = [...itemsState()]
+                                    newItems[index] = newItems[random];
+                                    newItems[random] = itemsState()[index];
+                                    setItemsState(newItems);
+                                }
+                            }}
+                        />
+                    )}
+                </For>
             </StaggeredGrid>
+        </>
+    )
+}
+
+function StaggeredImageOrTestItem(props: {
+    images: Accessor<boolean>
+} & StaggeredTestItemProps) {
+    return (
+        <>
+            <Show when={props.images()}>
+                <StaggeredImageItem {...splitProps(props, ['images'])[1]}/>
+            </Show>
+            <Show when={!props.images()}>
+                <StaggeredTestItem {...splitProps(props, ["images"])[1]} />
+            </Show>
         </>
     )
 }
@@ -215,7 +251,7 @@ function StaggeredImageItem(props: StaggeredTestItemProps) {
         <StaggeredGridItem
             index={index}
             spans={item.span}
-            style={{transition: "left 0.3s ease,top 0.3s ease", overflowX: "hidden"}}
+            style={{transition: "left 0.3s ease,top 0.3s ease", "overflow-x": "hidden"}}
         >
             <img src={"https://picsum.photos/" + item.width + "/" + item.height} alt={"Random Image"}/>
         </StaggeredGridItem>
@@ -223,23 +259,23 @@ function StaggeredImageItem(props: StaggeredTestItemProps) {
 }
 
 interface Options {
-    alignment: StaggeredAlignment,
+    alignment: Accessor<StaggeredAlignment>,
     setAlignment: (alignment: StaggeredAlignment) => void;
-    columnWidth: number;
+    columnWidth: Accessor<number>;
     setColumnWidth: (width: number) => void;
-    columns: number;
+    columns: Accessor<number>;
     setColumns: (cols: number) => void;
-    horizontalGap: number,
-    verticalGap: number,
+    horizontalGap: Accessor<number>,
+    verticalGap: Accessor<number>,
     setHorizontalGap: (gap: number) => void;
     setVerticalGap: (gap: number) => void;
-    fitHorizontalGap: boolean,
+    fitHorizontalGap: Accessor<boolean>,
     setFitHorizontalGap: (fit: boolean) => void;
-    images: boolean,
+    images: Accessor<boolean>,
     setImages: (set: boolean) => void;
-    multiSpan: boolean,
+    multiSpan: Accessor<boolean>,
     setMultiSpan: (multi: boolean) => void;
-    infiniteGrid: boolean,
+    infiniteGrid: Accessor<boolean>,
     setInfiniteGrid: (infinity: boolean) => void;
 }
 
@@ -262,17 +298,17 @@ function StaggeredOptions(props: Options) {
                 &nbsp;&nbsp;&nbsp;
                 <label for="fitHorizontalGap">Show Images: </label>
                 &nbsp;&nbsp;
-                <input type={"checkbox"} checked={props.images}
+                <input type={"checkbox"} checked={props.images()}
                        onChange={(e) => props.setImages(e.currentTarget.checked)}/>
                 &nbsp;&nbsp;&nbsp;
                 <label for="multiSpan">Multi Span: </label>
                 &nbsp;&nbsp;
-                <input type={"checkbox"} checked={props.multiSpan}
+                <input type={"checkbox"} checked={props.multiSpan()}
                        onChange={(e) => props.setMultiSpan(e.currentTarget.checked)}/>
                 <label for="alignment">Alignment : </label>
                 &nbsp;&nbsp;
                 <select
-                    value={props.alignment}
+                    value={props.alignment()}
                     id={"alignment"}
                     onChange={(e) => {
                         props.setAlignment(parseInt(e.currentTarget.value))
@@ -288,7 +324,7 @@ function StaggeredOptions(props: Options) {
                 <input
                     type="number"
                     id="columnWidth"
-                    value={props.columnWidth}
+                    value={props.columnWidth()}
                     min={0}
                     style={{width: "4em"}}
                     onChange={(e) => props.setColumnWidth(parseInt(e.currentTarget.value))}
@@ -299,7 +335,7 @@ function StaggeredOptions(props: Options) {
                 <input
                     type="number"
                     id="columns"
-                    value={props.columns}
+                    value={props.columns()}
                     min={0}
                     style={{width: "4em"}}
                     onChange={(e) => props.setColumns(parseInt(e.currentTarget.value))}
@@ -311,7 +347,7 @@ function StaggeredOptions(props: Options) {
                     type="number"
                     id="horizontalGap"
                     min={0}
-                    value={props.horizontalGap}
+                    value={props.horizontalGap()}
                     style={{width: "4em"}}
                     onChange={(e) => props.setHorizontalGap(parseInt(e.currentTarget.value))}
                 />
@@ -321,7 +357,7 @@ function StaggeredOptions(props: Options) {
                 <input
                     type="number"
                     id="verticalGap"
-                    value={props.verticalGap}
+                    value={props.verticalGap()}
                     min={0}
                     style={{width: "4em"}}
                     onChange={(e) => props.setVerticalGap(parseInt(e.currentTarget.value))}
@@ -329,12 +365,12 @@ function StaggeredOptions(props: Options) {
                 &nbsp;&nbsp;&nbsp;
                 <label for="fitHorizontalGap">Fit Horizontal Gap : </label>
                 &nbsp;&nbsp;
-                <input type={"checkbox"} checked={props.fitHorizontalGap}
+                <input type={"checkbox"} checked={props.fitHorizontalGap()}
                        onChange={(e) => props.setFitHorizontalGap(e.currentTarget.checked)}/>
                 &nbsp;&nbsp;&nbsp;
                 <label for="infiniteGrid">Infinite Grid : </label>
                 &nbsp;&nbsp;
-                <input type={"checkbox"} checked={props.infiniteGrid}
+                <input type={"checkbox"} checked={props.infiniteGrid()}
                        onChange={(e) => props.setInfiniteGrid(e.currentTarget.checked)}/>
             </div>
         </>

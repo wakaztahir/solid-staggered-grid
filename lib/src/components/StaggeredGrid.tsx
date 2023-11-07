@@ -1,6 +1,6 @@
 import {
     StaggeredAlignment,
-    StaggeredGridController,
+    StaggeredGridController, StaggeredGridOptions,
     StaggeredGridProps,
     StaggeredItemSpan,
 } from "./StaggeredGridModel";
@@ -15,8 +15,7 @@ interface GridItemData {
     update: (width: number, x: number, y: number) => void
 }
 
-const DefaultProps = {
-    elementType: "div",
+const DefaultOptions = {
     alignment: StaggeredAlignment.Center,
     calculateHeight: true,
     useElementWidth: false,
@@ -39,15 +38,24 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
     let gridItems: Array<GridItemData> = []
     let requestRepositioningId: number | undefined = undefined
 
-    // Default Props
-    const merged: Omit<StaggeredGridProps<T>, keyof typeof DefaultProps> & typeof DefaultProps = mergeProps(DefaultProps, props)
+    function getOptions() {
+        return (props.options ? props.options() : undefined)
+    }
 
     function registerController(controller: StaggeredGridController) {
-        controller.requestReposition = () => {
-            requestReposition()
+        controller.requestReposition = requestReposition
+        controller.reposition = reposition
+        controller.attachOnScrollListener = () => {
+            document.addEventListener("scroll", onScroll)
         }
-        controller.reposition = () => {
-            reposition()
+        controller.deAttachOnScrollListener = () => {
+            document.removeEventListener("scroll", onScroll)
+        }
+        controller.attachOnResize = () => {
+            window.addEventListener("resize", onResize)
+        }
+        controller.deAttachOnResize = () => {
+            window.removeEventListener("resize", onResize)
         }
         controller.isRegistered = true
     }
@@ -56,11 +64,11 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
         registerController(props.gridController);
     }
 
-    function getGridWidth(): number {
+    function getGridWidth(props : StaggeredGridOptions): number {
         if (props.gridWidth != null) {
             return props.gridWidth
         } else {
-            let count = getDefinedColsCount()
+            let count = getDefinedColsCount(props)
             if (count != null && props.columnWidth != null && !props.useElementWidth) {
                 return count * props.columnWidth
             } else if (gridElementRef != null) {
@@ -77,19 +85,19 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
         }
     }
 
-    function getDefinedColsCount(): number | undefined {
-        if (props.columns != null && props.columns > 0) {
-            return Math.max(1, Math.min(gridItems.length, props.columns))
+    function getDefinedColsCount(options : StaggeredGridOptions): number | undefined {
+        if (options.columns != null && options.columns > 0) {
+            return Math.max(1, Math.min(gridItems.length, options.columns))
         } else {
             return undefined
         }
     }
 
-    function getDefinedColumnWidth(gridWidth: number): number {
-        if (props.columnWidth != null) {
-            return props.columnWidth
+    function getDefinedColumnWidth(options : StaggeredGridOptions, gridWidth: number): number {
+        if (options.columnWidth != null) {
+            return options.columnWidth
         } else {
-            let count = getDefinedColsCount()
+            let count = getDefinedColsCount(options)
             if (count != undefined) {
                 return gridWidth / count
             } else {
@@ -99,28 +107,29 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
         }
     }
 
-    function getColumnWidth(gridWidth: number, columnCount: number, horizontalGap: number): number {
-        let columnWidth = getDefinedColumnWidth(gridWidth)
+    function getColumnWidth(props : StaggeredGridOptions, gridWidth: number, columnCount: number, horizontalGap: number): number {
+        let columnWidth = getDefinedColumnWidth(props, gridWidth)
         if (props.fitHorizontalGap) {
             columnWidth -= (((columnCount - 1) * horizontalGap) / columnCount)
         }
         return columnWidth
     }
 
-    function getColsCount(gridWidth: number): number {
-        return getDefinedColsCount() || Math.max(1, Math.min(gridItems.length, Math.ceil(gridWidth / getDefinedColumnWidth(gridWidth)) - 1))
+    function getColsCount(props : StaggeredGridOptions, gridWidth: number): number {
+        return getDefinedColsCount(props) || Math.max(1, Math.min(gridItems.length, Math.ceil(gridWidth / getDefinedColumnWidth(props, gridWidth)) - 1))
     }
 
-    function reposition() {
+    function reposition(userOptions : StaggeredGridOptions) {
         try {
+            const props = userOptions
             if (gridItems.length === 0) return
-            gridWidth = getGridWidth()
-            const columnCount = getColsCount(gridWidth)
+            gridWidth = getGridWidth(props)
+            const columnCount = getColsCount(props, gridWidth)
             if (columnCount < 1) return;
-            const horizontalGap = props.horizontalGap
-            const verticalGap = props.verticalGap
-            const columnWidth = getColumnWidth(gridWidth, columnCount, merged.horizontalGap)
-            const calculatedGridWidth = (columnCount * columnWidth) + (columnCount - 1) * merged.horizontalGap
+            const horizontalGap = props.horizontalGap || DefaultOptions.horizontalGap
+            const verticalGap = props.verticalGap || DefaultOptions.verticalGap
+            const columnWidth = getColumnWidth(props, gridWidth, columnCount, horizontalGap)
+            const calculatedGridWidth = (columnCount * columnWidth) + (columnCount - 1) * horizontalGap
             let rowWidth = 0;
             let colNumber = 0;
             const colsHeight: number[] = Array(columnCount).fill(0)
@@ -140,7 +149,7 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
                     const itemSpan: number = Math.max(1, Math.min(item.itemColumnSpan, columnCount))
 
                     // Getting item width & height
-                    const itemWidth = itemSpan * columnWidth + (Math.max(itemSpan - 1, 0) * merged.horizontalGap)
+                    const itemWidth = itemSpan * columnWidth + (Math.max(itemSpan - 1, 0) * horizontalGap)
                     const itemHeight = item.itemHeight
 
                     let x: number;
@@ -156,7 +165,7 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
                     }
                     if (itemSpan === 1) {
                         y = colsHeight[colNumber]
-                        colsHeight[colNumber] += itemHeight + merged.verticalGap
+                        colsHeight[colNumber] += itemHeight + verticalGap
                     } else if (itemSpan > 1) {
                         let largeHeight = 0
                         for (let i = colNumber; i < (colNumber + itemSpan); i++) {
@@ -166,10 +175,10 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
                         }
                         y = largeHeight
                         for (let i = colNumber; i < (colNumber + itemSpan); i++) {
-                            colsHeight[i] = largeHeight + itemHeight + merged.verticalGap
+                            colsHeight[i] = largeHeight + itemHeight + verticalGap
                         }
                     }
-                    rowWidth += itemWidth + merged.horizontalGap
+                    rowWidth += itemWidth + horizontalGap
                     colNumber += itemSpan
                     item.update(itemWidth, (rowOffset + x), y)
                 } catch
@@ -194,38 +203,40 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
         }
     }
 
-    function requestReposition() {
+    function requestReposition(options : StaggeredGridOptions) {
         if (requestRepositioningId == null) {
             requestRepositioningId = window.requestAnimationFrame(() => {
                 requestRepositioningId = undefined
-                reposition()
+                reposition(options)
             })
         }
     }
 
     function onResize() {
-        requestReposition()
+        const options = getOptions()
+        options && requestReposition(options)
     }
 
     function onScroll() {
+        const options = (props.options ? props.options() : undefined) || DefaultOptions
         if (gridElementRef == null || calculatedGridHeight() == null) {
-            if (!props.calculateHeight) {
+            if (!options.calculateHeight) {
                 console.warn("calculateHeight must be true for requestAppend to work !")
             }
             return
         }
         const offset = gridElementRef.getBoundingClientRect().top - (gridElementRef.offsetParent?.getBoundingClientRect().top || 0);
         const top = (window.scrollY || window.pageYOffset) + window.innerHeight - offset;
-        if (top >= gridElementRef.scrollHeight - merged.requestAppendScrollTolerance) {
-            if (props.requestAppend != null) {
-                props.requestAppend()
+        if (top >= gridElementRef.scrollHeight - (options.requestAppendScrollTolerance || DefaultOptions.requestAppendScrollTolerance)) {
+            if (options.requestAppend != null) {
+                options.requestAppend()
             }
         }
     }
 
     function getHeightProp(): JSX.CSSProperties {
         let heightProp: JSX.CSSProperties
-        if (props.calculateHeight && calculatedGridHeight() != null) {
+        if ((props.options || (() => DefaultOptions))().calculateHeight && calculatedGridHeight() != null) {
             heightProp = {height: calculatedGridHeight() + "px"}
         } else {
             heightProp = {}
@@ -254,14 +265,16 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
             }
         }
         if (reposition && repositionedOnce) {
-            requestReposition()
+            const options = getOptions()
+            options && requestReposition(options)
         }
     }
 
     function removeItem(index: number) {
         if (gridItems[index] != null) {
             gridItems[index].mounted = false
-            requestReposition()
+            const options = getOptions()
+            options && requestReposition(options)
         }
     }
 
@@ -291,68 +304,36 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
     // Lifecycle Functions
 
     onMount(() => {
-        requestReposition()
-        if (props.repositionOnResize) {
+        const options = getOptions()
+        if (options && options.repositionOnResize) {
             window.addEventListener("resize", onResize)
         }
-        if (props.requestAppend != null) {
+        if (options && options.requestAppend != null) {
             document.addEventListener("scroll", onScroll)
         }
     })
 
     createEffect(() => {
-        // TODO fix this effect, which changes based on props
-        // if (prevProps.columns !== this.props.columns ||
-        //     prevProps.columnWidth !== this.props.columnWidth ||
-        //     prevProps.gridWidth !== this.props.gridWidth ||
-        //     prevProps.calculateHeight !== this.props.calculateHeight ||
-        //     prevProps.horizontalGap !== this.props.horizontalGap ||
-        //     prevProps.fitHorizontalGap !== this.props.fitHorizontalGap ||
-        //     prevProps.alignment !== this.props.alignment ||
-        //     prevProps.children !== this.props.children
-        // ) {
-        //     requestReposition()
-        // }
-        // if (prevProps.requestAppend == null && this.props.requestAppend != null) {
-        //     document.addEventListener("scroll", this.onScroll)
-        // } else if (prevProps.requestAppend != null && this.props.requestAppend == null) {
-        //     document.removeEventListener("scroll", this.onScroll)
-        // }
-        // if (!prevProps.repositionOnResize && this.props.repositionOnResize) {
-        //     window.addEventListener("resize", this.onResize)
-        // } else if (prevProps.repositionOnResize && !this.props.repositionOnResize) {
-        //     window.removeEventListener("resize", this.onResize)
-        // }
+        const options = getOptions()
+        if(options) {
+            requestReposition(options)
+        }
         if (props.gridController != null && !props.gridController.isRegistered) {
             registerController(props.gridController!);
         }
     })
 
     onCleanup(() => {
-        if(!isServer) {
-            if (props.repositionOnResize) {
+        if (!isServer) {
+            const options = getOptions()
+            if (options && options.repositionOnResize) {
                 window.removeEventListener("resize", onResize)
             }
-            if (props.requestAppend != null) {
+            if (options && options.requestAppend != null) {
                 document.removeEventListener("scroll", onScroll)
             }
         }
     })
-
-    // Render Code
-
-    // Dynamic element has been used in place of this
-    // {React.createElement(props.elementType, {
-    //     ...this.elementProps(),
-    //     ref: (element: HTMLElement | null) => {
-    //         this.gridElementRef = element
-    //     },
-    //     style: {
-    //         position: "relative",
-    //         ...heightProp,
-    //         ...props.style
-    //     }
-    // }, this.props.children)}
 
     return (
         <StaggeredGridContext.Provider
@@ -384,6 +365,18 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
 export function createStaggeredGridController(): StaggeredGridController {
     return {
         isRegistered: false,
+        attachOnResize(): void {
+            console.warn("StaggeredGridController must be registered with a StaggeredGrid before use.")
+        },
+        attachOnScrollListener(): void {
+            console.warn("StaggeredGridController must be registered with a StaggeredGrid before use.")
+        },
+        deAttachOnResize(): void {
+            console.warn("StaggeredGridController must be registered with a StaggeredGrid before use.")
+        },
+        deAttachOnScrollListener(): void {
+            console.warn("StaggeredGridController must be registered with a StaggeredGrid before use.")
+        },
         reposition(): void {
             console.warn("StaggeredGridController must be registered with a StaggeredGrid before use.")
         },

@@ -11,7 +11,8 @@
     "types": ["vite/client"],
     "baseUrl": "./",
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*"],
+      "solid-staggered-grid" : ["./lib/src"]
     }
   }
 }
