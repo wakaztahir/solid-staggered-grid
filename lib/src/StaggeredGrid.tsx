@@ -1,6 +1,6 @@
 import {
     StaggeredAlignment,
-    StaggeredGridController, StaggeredGridOptions,
+    StaggeredGridController, StaggeredGridCreateOptions, StaggeredGridOptions,
     StaggeredGridProps,
     StaggeredItemSpan,
 } from "./StaggeredGridModel";
@@ -26,9 +26,9 @@ const DefaultOptions = {
     requestAppendScrollTolerance: 20,
 }
 
-export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(
-    gridElementRef : () => HTMLElement | undefined,
-    props: StaggeredGridProps<T>
+export function createStaggeredGrid(
+    gridElementRef: () => HTMLElement | undefined,
+    props: StaggeredGridCreateOptions
 ) {
 
     // state
@@ -65,7 +65,7 @@ export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div
         registerController(props.gridController);
     }
 
-    function getGridWidth(props : StaggeredGridOptions): number {
+    function getGridWidth(props: StaggeredGridOptions): number {
         if (props.gridWidth != null) {
             return props.gridWidth
         } else {
@@ -87,7 +87,7 @@ export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div
         }
     }
 
-    function getDefinedColsCount(options : StaggeredGridOptions): number | undefined {
+    function getDefinedColsCount(options: StaggeredGridOptions): number | undefined {
         if (options.columns != null && options.columns > 0) {
             return Math.max(1, Math.min(gridItems.length, options.columns))
         } else {
@@ -95,7 +95,7 @@ export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div
         }
     }
 
-    function getDefinedColumnWidth(options : StaggeredGridOptions, gridWidth: number): number {
+    function getDefinedColumnWidth(options: StaggeredGridOptions, gridWidth: number): number {
         if (options.columnWidth != null) {
             return options.columnWidth
         } else {
@@ -109,7 +109,7 @@ export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div
         }
     }
 
-    function getColumnWidth(props : StaggeredGridOptions, gridWidth: number, columnCount: number, horizontalGap: number): number {
+    function getColumnWidth(props: StaggeredGridOptions, gridWidth: number, columnCount: number, horizontalGap: number): number {
         let columnWidth = getDefinedColumnWidth(props, gridWidth)
         if (props.fitHorizontalGap) {
             columnWidth -= (((columnCount - 1) * horizontalGap) / columnCount)
@@ -117,11 +117,11 @@ export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div
         return columnWidth
     }
 
-    function getColsCount(props : StaggeredGridOptions, gridWidth: number): number {
+    function getColsCount(props: StaggeredGridOptions, gridWidth: number): number {
         return getDefinedColsCount(props) || Math.max(1, Math.min(gridItems.length, Math.ceil(gridWidth / getDefinedColumnWidth(props, gridWidth)) - 1))
     }
 
-    function reposition(userOptions : StaggeredGridOptions) {
+    function reposition(userOptions: StaggeredGridOptions) {
         try {
             const props = userOptions
             if (gridItems.length === 0) return
@@ -206,7 +206,7 @@ export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div
         }
     }
 
-    function requestReposition(options : StaggeredGridOptions) {
+    function requestReposition(options: StaggeredGridOptions) {
         if (requestRepositioningId == null) {
             requestRepositioningId = window.requestAnimationFrame(() => {
                 requestRepositioningId = undefined
@@ -222,7 +222,7 @@ export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div
 
     function onScroll() {
         const options = getOptions()
-        if(!options) return
+        if (!options) return
         let ref = gridElementRef()
         if (ref == null || calculatedGridHeight() == null) {
             if (!options.calculateHeight) {
@@ -319,19 +319,19 @@ export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div
 
     return {
 
-        updateItem : updateItem,
-        removeItem : removeItem,
-        context : {
+        updateItem: updateItem,
+        removeItem: removeItem,
+        context: {
             updateItem,
             removeItem
         },
-        getHeightProp : getHeightProp
+        getHeightProp: getHeightProp
 
     }
 
 }
 
-export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(props: StaggeredGridProps<T>) {
+export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(props: JSX.IntrinsicElements[T] & StaggeredGridProps<T>) {
 
     let gridElementRef: HTMLElement | undefined
 
@@ -368,7 +368,7 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
                 style={{
                     position: "relative",
                     ...grid.getHeightProp(),
-                    ...props.style
+                    ...(props.style || {})
                 }}
                 children={props.children}
             />

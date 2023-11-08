@@ -25,7 +25,7 @@ export interface PositionedItem {
     /** translateY of the item */
     top: number,
     /** should item be animated to this position **/
-    animateTo : boolean
+    animateTo: boolean
 }
 
 export interface StaggeredGridController {
@@ -33,9 +33,9 @@ export interface StaggeredGridController {
     isRegistered: boolean,
 
     /** This will request reposition on the next animation frame , useful for multiple calls */
-    requestReposition: (options : StaggeredGridOptions) => void;
+    requestReposition: (options: StaggeredGridOptions) => void;
     /** Force reposition all the items */
-    reposition: (options : StaggeredGridOptions) => void;
+    reposition: (options: StaggeredGridOptions) => void;
 
     /** This attaches the event listener for on scroll **/
     attachOnScrollListener: () => void;
@@ -76,20 +76,23 @@ export interface StaggeredGridOptions {
     requestAppendScrollTolerance?: number,
 }
 
-export interface StaggeredGridProps<T extends keyof JSX.IntrinsicElements = "div"> extends JSX.HTMLAttributes<T> {
-    /** type of html element for the grid , by default 'div' is used */
-    elementType?: T,
+export interface StaggeredGridCreateOptions {
     /** options for staggered grid **/
     options?: Accessor<StaggeredGridOptions>
-    /** children of the grid , must be StaggeredGridItem */
-    children?: JSXElement | undefined,
     /** css properties */
     style?: JSX.CSSProperties | undefined,
     /** grid controller used to swap items or reposition forcibly , can be obtained using createStaggeredGridController */
-    gridController?: StaggeredGridController | undefined,
+    gridController?: StaggeredGridController | undefined
 }
 
-export type StaggeredGridItemProps<T extends ValidComponent> = {
+export interface StaggeredGridProps<T extends keyof JSX.IntrinsicElements = "div"> extends StaggeredGridCreateOptions {
+    /** type of html element for the grid , by default 'div' is used */
+    elementType?: T
+    /** children of the grid , must be StaggeredGridItem */
+    children?: JSXElement | undefined,
+}
+
+export type StaggeredGridItemProps<T extends keyof JSX.IntrinsicElements = "div"> = {
     /** type of html element used , by default 'div' */
     elementType?: T,
     /** initial position of the item on the grid , default 0 for everything */
