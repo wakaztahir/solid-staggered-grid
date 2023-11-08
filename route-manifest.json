@@ -3,20 +3,20 @@
     "type": "route",
     "script": {
       "type": "script",
-      "href": "/assets/_...404_-379794f9.js"
+      "href": "/solid-staggered-grid/assets/_...404_-d8abcac5.js"
     },
     "assets": [
       {
         "type": "script",
-        "href": "/assets/_...404_-379794f9.js"
+        "href": "/solid-staggered-grid/assets/_...404_-d8abcac5.js"
       },
       {
         "type": "script",
-        "href": "/assets/entry-client-a1916111.js"
+        "href": "/solid-staggered-grid/assets/entry-client-d9f900d5.js"
       },
       {
         "type": "script",
-        "href": "/assets/index-cc22fc53.js"
+        "href": "/solid-staggered-grid/assets/index-5088c501.js"
       }
     ]
   },
@@ -24,20 +24,20 @@
     "type": "route",
     "script": {
       "type": "script",
-      "href": "/assets/about-5a4a03ba.js"
+      "href": "/solid-staggered-grid/assets/about-8e95d74e.js"
     },
     "assets": [
       {
         "type": "script",
-        "href": "/assets/about-5a4a03ba.js"
+        "href": "/solid-staggered-grid/assets/about-8e95d74e.js"
       },
       {
         "type": "script",
-        "href": "/assets/entry-client-a1916111.js"
+        "href": "/solid-staggered-grid/assets/entry-client-d9f900d5.js"
       },
       {
         "type": "script",
-        "href": "/assets/index-cc22fc53.js"
+        "href": "/solid-staggered-grid/assets/index-5088c501.js"
       }
     ]
   },
@@ -45,16 +45,16 @@
     "type": "route",
     "script": {
       "type": "script",
-      "href": "/assets/index-1a439ee0.js"
+      "href": "/solid-staggered-grid/assets/index-e91fc3f8.js"
     },
     "assets": [
       {
         "type": "script",
-        "href": "/assets/index-1a439ee0.js"
+        "href": "/solid-staggered-grid/assets/index-e91fc3f8.js"
       },
       {
         "type": "script",
-        "href": "/assets/entry-client-a1916111.js"
+        "href": "/solid-staggered-grid/assets/entry-client-d9f900d5.js"
       }
     ]
   },
@@ -62,12 +62,12 @@
     "type": "entry",
     "script": {
       "type": "script",
-      "href": "/assets/entry-client-a1916111.js"
+      "href": "/solid-staggered-grid/assets/entry-client-d9f900d5.js"
     },
     "assets": [
       {
         "type": "script",
-        "href": "/assets/entry-client-a1916111.js"
+        "href": "/solid-staggered-grid/assets/entry-client-d9f900d5.js"
       }
     ]
   },

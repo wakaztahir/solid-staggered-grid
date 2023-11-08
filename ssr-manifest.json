@@ -2,25 +2,25 @@
   "\u0000vite/preload-helper": [
   ],
   "lib/src/components/StaggeredGrid.tsx": [
-    "/assets/index-1a439ee0.js"
+    "/solid-staggered-grid/assets/index-e91fc3f8.js"
   ],
   "lib/src/components/StaggeredGridContext.tsx": [
-    "/assets/index-1a439ee0.js"
+    "/solid-staggered-grid/assets/index-e91fc3f8.js"
   ],
   "lib/src/components/StaggeredGridItem.tsx": [
-    "/assets/index-1a439ee0.js"
+    "/solid-staggered-grid/assets/index-e91fc3f8.js"
   ],
   "lib/src/components/StaggeredGridModel.ts": [
-    "/assets/index-1a439ee0.js"
+    "/solid-staggered-grid/assets/index-e91fc3f8.js"
   ],
   "node_modules/@qinetik/anique-icons/dist/index.js": [
-    "/assets/index-cc22fc53.js"
+    "/solid-staggered-grid/assets/index-5088c501.js"
   ],
   "node_modules/@qinetik/anique/dist/index.js": [
-    "/assets/index-cc22fc53.js"
+    "/solid-staggered-grid/assets/index-5088c501.js"
   ],
   "node_modules/@qinetik/emotion/dist/index.js": [
-    "/assets/index-cc22fc53.js"
+    "/solid-staggered-grid/assets/index-5088c501.js"
   ],
   "node_modules/@solidjs/meta/dist/index.jsx": [
   ],
@@ -45,7 +45,7 @@
   "node_modules/solid-start/error-boundary/ErrorBoundary.tsx": [
   ],
   "node_modules/solid-start/islands/useLocation.tsx": [
-    "/assets/about-5a4a03ba.js"
+    "/solid-staggered-grid/assets/about-8e95d74e.js"
   ],
   "node_modules/solid-start/root/Document.tsx": [
   ],
@@ -60,25 +60,25 @@
   "node_modules/solid-start/server/types.tsx": [
   ],
   "src/components/App.tsx": [
-    "/assets/index-1a439ee0.js"
+    "/solid-staggered-grid/assets/index-e91fc3f8.js"
   ],
   "src/components/AppBar.tsx": [
-    "/assets/about-5a4a03ba.js"
+    "/solid-staggered-grid/assets/about-8e95d74e.js"
   ],
   "src/components/Navigation.tsx": [
-    "/assets/about-5a4a03ba.js"
+    "/solid-staggered-grid/assets/about-8e95d74e.js"
   ],
   "src/entry-client.tsx": [
   ],
   "src/root.tsx": [
   ],
   "src/routes/[...404].tsx": [
-    "/assets/_...404_-379794f9.js"
+    "/solid-staggered-grid/assets/_...404_-d8abcac5.js"
   ],
   "src/routes/about.tsx": [
-    "/assets/about-5a4a03ba.js"
+    "/solid-staggered-grid/assets/about-8e95d74e.js"
   ],
   "src/routes/index.tsx": [
-    "/assets/index-1a439ee0.js"
+    "/solid-staggered-grid/assets/index-e91fc3f8.js"
   ]
 }
