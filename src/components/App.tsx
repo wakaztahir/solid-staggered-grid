@@ -213,9 +213,7 @@ function StaggeredTestItem(props: StaggeredTestItemProps) {
         index: props.index,
         spans: span(),
         itemHeight: height(),
-        style : {
-            transition : "top, left 0.3s ease"
-        }
+        style : {}
     })
 
     return (

@@ -24,6 +24,8 @@ export interface PositionedItem {
     left: number,
     /** translateY of the item */
     top: number,
+    /** should item be animated to this position **/
+    animateTo : boolean
 }
 
 export interface StaggeredGridController {
