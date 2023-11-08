@@ -1,6 +1,6 @@
 {
-  "_index-5088c501.js": {
-    "file": "assets/index-5088c501.js",
+  "_index-a9269722.js": {
+    "file": "assets/index-a9269722.js",
     "imports": [
       "src/entry-client.tsx"
     ]
@@ -11,30 +11,30 @@
       "src/routes/about.tsx",
       "src/routes/index.tsx"
     ],
-    "file": "assets/entry-client-d9f900d5.js",
+    "file": "assets/entry-client-c4ec3e8d.js",
     "isEntry": true,
     "src": "src/entry-client.tsx"
   },
   "src/routes/[...404].tsx": {
-    "file": "assets/_...404_-d8abcac5.js",
+    "file": "assets/_...404_-b982f02e.js",
     "imports": [
       "src/entry-client.tsx",
-      "_index-5088c501.js"
+      "_index-a9269722.js"
     ],
     "isDynamicEntry": true,
     "src": "src/routes/[...404].tsx"
   },
   "src/routes/about.tsx": {
-    "file": "assets/about-8e95d74e.js",
+    "file": "assets/about-3ec5fa9f.js",
     "imports": [
       "src/entry-client.tsx",
-      "_index-5088c501.js"
+      "_index-a9269722.js"
     ],
     "isDynamicEntry": true,
     "src": "src/routes/about.tsx"
   },
   "src/routes/index.tsx": {
-    "file": "assets/index-e91fc3f8.js",
+    "file": "assets/index-66ae4939.js",
     "imports": [
       "src/entry-client.tsx"
     ],
