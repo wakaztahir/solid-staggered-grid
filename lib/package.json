@@ -1,6 +1,6 @@
 {
   "name": "solid-staggered-grid",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "Staggered Grid for Solid JS",
   "author": "Waqas Tahir",
   "license": "ISC",
@@ -19,6 +19,7 @@
     "dist/**"
   ],
   "type": "module",
+  "types" : "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "node -e \"if(require('fs').existsSync('dist')) require('fs').rmSync('dist', { recursive : true })\"",
