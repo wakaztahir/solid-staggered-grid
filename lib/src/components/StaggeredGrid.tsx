@@ -73,7 +73,7 @@ export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div
             let ref = gridElementRef()
             if (count != null && props.columnWidth != null && !props.useElementWidth) {
                 return count * props.columnWidth
-            } else if (gridElementRef() != null) {
+            } else if (ref != null) {
                 const gw = ref.clientWidth
                 if (gw == null || gw == 0) {
                     console.error("gridWidth is zero , gridWidth prop || css width property should be given to StaggeredGrid")
@@ -319,6 +319,10 @@ export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div
 
         updateItem : updateItem,
         removeItem : removeItem,
+        context : {
+            updateItem,
+            removeItem
+        },
         getHeightProp : getHeightProp
 
     }
@@ -354,11 +358,7 @@ export function StaggeredGrid<T extends keyof JSX.IntrinsicElements = "div">(pro
     }
 
     return (
-        <StaggeredGridContext.Provider
-            value={{
-                updateItem: grid.updateItem,
-                removeItem: grid.removeItem,
-            }}>
+        <StaggeredGridContext.Provider value={grid.context}>
             <Dynamic
                 component={props.elementType || "div"}
                 {...elementProps()}

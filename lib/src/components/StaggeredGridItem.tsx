@@ -19,7 +19,7 @@ export function useStaggeredGridItemProps(props: StaggeredGridItemProps): () => 
     function updateTranslate(width: number, x: number, y: number) {
         const position = state()
         if (position.width !== width || x !== position.left || y !== position.top) {
-            const animateTo = position.left != 0 && position.top != 0
+            const animateTo = position.left != 0 || position.top != 0
             const NewPos = {
                 width: width,
                 left: x,

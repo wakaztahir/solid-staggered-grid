@@ -127,10 +127,7 @@ function App() {
                 infiniteGrid={infiniteGrid}
                 setInfiniteGrid={setInfiniteGrid}
             />
-            <StaggeredGridContext.Provider value={{
-                removeItem: grid.removeItem,
-                updateItem: grid.updateItem
-            }}>
+            <StaggeredGridContext.Provider value={grid.context}>
                 <div
                     ref={gridElementRef}
                     style={{
