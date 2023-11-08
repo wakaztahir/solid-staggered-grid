@@ -80,12 +80,15 @@ Now let's create the `YourStaggeredGridItem`
 
 ```typescript jsx
 function YourStaggeredGridItem(props) {
+    let ref : HTMLElement | undefined = undefined
     const itemProps = useStaggeredGridItemProps({
         index: props.index,
-        spans: 1
+        spans: 1,
+        ref : () => ref
     })
     return (
         <div
+            ref={ref}
             {...itemProps()}
         >
             Hello This is my staggered grid item : {props.item}

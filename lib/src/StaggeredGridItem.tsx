@@ -3,13 +3,11 @@ import {StaggeredGridItemProps} from "./StaggeredGridModel";
 import {createEffect, createSignal, JSX, onCleanup} from "solid-js";
 import {Dynamic} from "solid-js/web";
 
-export function useStaggeredGridItemProps<T extends keyof JSX.IntrinsicElements = "div">(props: StaggeredGridItemProps<T>): () => JSX.HTMLAttributes<T> {
+export function useStaggeredGridItemProps<T extends keyof JSX.IntrinsicElements = "div">(props: StaggeredGridItemProps<T>): () => JSX.IntrinsicElements[T] {
 
     const context = useStaggeredGrid()
 
     const [state, setState] = createSignal(props.initialPosition)
-
-    let itemElementRef: HTMLElement | undefined = undefined
 
     function updateTranslate(width: number, x: number, y: number) {
         const position = state()
@@ -29,6 +27,7 @@ export function useStaggeredGridItemProps<T extends keyof JSX.IntrinsicElements 
      * Reports height and width
      */
     function reportData() {
+        const itemElementRef = props.ref()
         if (props.itemHeight == null && itemElementRef == null) return
         context.updateItem(props.index(), props.spans || 1, props.itemHeight || itemElementRef!.clientHeight, updateTranslate)
     }
@@ -37,7 +36,7 @@ export function useStaggeredGridItemProps<T extends keyof JSX.IntrinsicElements 
 
     onCleanup(() => context.removeItem(props.index()))
 
-    function transform(): JSX.HTMLAttributes<HTMLElement> {
+    function transform(): JSX.IntrinsicElements[T] {
         const itemPos = state()
         const elemProps: any = {...props}
         delete elemProps.elementType
@@ -78,9 +77,6 @@ export function useStaggeredGridItemProps<T extends keyof JSX.IntrinsicElements 
 
         onLoad: reportData,
 
-        // @ts-ignore
-        ref: props.itemHeight == null ? itemElementRef : undefined,
-
     })
 
 }
@@ -90,7 +86,6 @@ export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements = "div">
     const itemProps = useStaggeredGridItemProps(props)
 
     return (
-        // @ts-ignore
         <Dynamic
             component={props.elementType || "div"}
             {...itemProps()}

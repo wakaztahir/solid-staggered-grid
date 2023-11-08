@@ -224,14 +224,16 @@ function StaggeredTestItem(props: StaggeredTestItemProps) {
     let [span, setSpan] = createSignal(props.item.span)
     let [height, setHeight] = createSignal(props.item.height)
 
+    let ref : HTMLElement | undefined = undefined
     const itemProps = useStaggeredGridItemProps({
         index: props.index,
         spans: span(),
-        itemHeight: height()
+        ref : () => ref
     })
 
     return (
         <div
+            ref={ref}
             {...itemProps()}
         >
             <div

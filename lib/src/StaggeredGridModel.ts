@@ -103,6 +103,8 @@ export type StaggeredGridItemProps<T extends keyof JSX.IntrinsicElements = "div"
     spans?: StaggeredItemSpan | number,
     /** index of the item in the items */
     index: Accessor<number>,
+    /** ref to calculate height of the item, if you already know the height provide itemHeight instead **/
+    ref : () => HTMLElement | undefined
     /** CSS Properties */
     style?: JSX.CSSProperties | undefined,
     /** children of the item */
