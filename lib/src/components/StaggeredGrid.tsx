@@ -125,6 +125,7 @@ export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div
         try {
             const props = userOptions
             if (gridItems.length === 0) return
+            // console.log("Repositioning Items", gridItems)
             gridWidth = getGridWidth(props)
             const columnCount = getColsCount(props, gridWidth)
             if (columnCount < 1) return;
@@ -251,6 +252,7 @@ export function createStaggeredGrid<T extends keyof JSX.IntrinsicElements = "div
 
     // Other Functions
     function updateItem(index: number, itemColumnSpan: StaggeredItemSpan | number, height: number, update: (width: number, x: number, y: number) => void) {
+        // console.log("UpdateItem", index, itemColumnSpan, height)
         let reposition: boolean = false
         if (gridItems[index] != null) {
             if (itemColumnSpan !== gridItems[index].itemColumnSpan || height !== gridItems[index].itemHeight) {

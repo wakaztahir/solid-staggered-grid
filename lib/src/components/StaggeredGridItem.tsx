@@ -30,12 +30,12 @@ export function useStaggeredGridItemProps<T extends ValidComponent = "div">(prop
      */
     function reportData() {
         if (props.itemHeight == null && itemElementRef == null) return
-        context.updateItem(props.index, props.spans || 1, props.itemHeight || itemElementRef!.clientHeight, updateTranslate)
+        context.updateItem(props.index(), props.spans || 1, props.itemHeight || itemElementRef!.clientHeight, updateTranslate)
     }
 
     createEffect(reportData)
 
-    onCleanup(() => context.removeItem(props.index))
+    onCleanup(() => context.removeItem(props.index()))
 
     function transform(): JSX.HTMLAttributes<HTMLElement> {
         const itemPos = state()

@@ -105,7 +105,7 @@ export type StaggeredGridItemProps<T extends ValidComponent> = {
     /** span of the item on the grid , column span for vertical grid */
     spans?: StaggeredItemSpan | number,
     /** index of the item in the items */
-    index: number,
+    index: Accessor<number>,
     /** CSS Properties */
     style?: JSX.CSSProperties | undefined,
     /** children of the item */

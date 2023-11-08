@@ -44,11 +44,15 @@ function App() {
 
     const totalItems = 20
 
+    function getRandomHeight() : number {
+        return Math.floor((Math.random() * 300) + 300)
+    }
+
     // calculating heights array for items
     function randomHeights() {
         let heights: Array<number> = []
         for (let i = 0; i < totalItems; i++) {
-            heights.push(Math.floor((Math.random() * 300) + 300))
+            heights.push(getRandomHeight())
         }
         return heights
     }
@@ -139,11 +143,24 @@ function App() {
                 >
                     <For each={itemsState()}>
                         {(item, index) => (
-                            <StaggeredTestItem
+                            <StaggeredImageOrTestItem
                                 columnWidth={options().columnWidth}
-                                // images={images}
-                                index={index()}
+                                images={images}
+                                index={index}
                                 item={item}
+                                addNext={(index) => {
+                                    setItemsState(prevItems => {
+                                        const newItems = [...prevItems]
+                                        newItems.splice(index + 1, 0, {
+                                            key : "newItem" + (index + 1),
+                                            name : "Item " + (index + 1),
+                                            height : getRandomHeight(),
+                                            width : options().columnWidth,
+                                            span : 1
+                                        });
+                                        return newItems
+                                    })
+                                }}
                                 removeMe={(index: number) => {
                                     setItemsState((prevItems) => {
                                         let newItems = [...prevItems]
@@ -194,8 +211,9 @@ function StaggeredImageOrTestItem(props: {
 
 interface StaggeredTestItemProps {
     item: Item,
-    index: number,
+    index: Accessor<number>,
     columnWidth: number,
+    addNext : (index : number) => void;
     removeMe: (index: number) => void;
     updateMe: (index: number, item: Item) => void;
     swapWithRandom: (index: number) => void;
@@ -246,13 +264,14 @@ function StaggeredTestItem(props: StaggeredTestItemProps) {
                         setHeight(props.item.height)
                     }}
                 /></div>
-                <button onClick={() => props.removeMe(props.index)}>Remove Me</button>
-                <button onClick={() => props.updateMe(props.index, {
+                <button onClick={() => props.addNext(props.index())}>Add Next</button>
+                <button onClick={() => props.removeMe(props.index())}>Remove Me</button>
+                <button onClick={() => props.updateMe(props.index(), {
                     ...props.item,
                     name: props.item.name + "Updated"
                 })}>Update Me
                 </button>
-                <button onClick={() => props.swapWithRandom(props.index)}>Swap Me
+                <button onClick={() => props.swapWithRandom(props.index())}>Swap Me
                 </button>
             </div>
         </div>
@@ -301,6 +320,7 @@ function StaggeredOptions(props: Options) {
                 width: "100%",
                 display: "flex",
                 "justify-content": "center",
+                gap : "0.75em",
                 padding: "1em 0em",
                 position: "fixed",
                 top: 0,
@@ -309,18 +329,13 @@ function StaggeredOptions(props: Options) {
                 background: "rgba(255,255,255,.3)",
                 "flex-wrap": "wrap"
             }}>
-                &nbsp;&nbsp;&nbsp;
                 <label for="fitHorizontalGap">Show Images: </label>
-                &nbsp;&nbsp;
                 <input type={"checkbox"} checked={props.images()}
                        onChange={(e) => props.setImages(e.currentTarget.checked)}/>
-                &nbsp;&nbsp;&nbsp;
                 <label for="multiSpan">Multi Span: </label>
-                &nbsp;&nbsp;
                 <input type={"checkbox"} checked={props.multiSpan()}
                        onChange={(e) => props.setMultiSpan(e.currentTarget.checked)}/>
                 <label for="alignment">Alignment : </label>
-                &nbsp;&nbsp;
                 <select
                     value={props.alignment()}
                     id={"alignment"}
@@ -332,9 +347,7 @@ function StaggeredOptions(props: Options) {
                     <option value={StaggeredAlignment.Center}>Center</option>
                     <option value={StaggeredAlignment.End}>End</option>
                 </select>
-                &nbsp;&nbsp;&nbsp;
                 <label for="columnWidth">Column Width : </label>
-                &nbsp;&nbsp;
                 <input
                     type="number"
                     id="columnWidth"
@@ -343,9 +356,7 @@ function StaggeredOptions(props: Options) {
                     style={{width: "4em"}}
                     onChange={(e) => props.setColumnWidth(parseInt(e.currentTarget.value))}
                 />
-                &nbsp;&nbsp;&nbsp;
                 <label for="columns">Total Columns : </label>
-                &nbsp;&nbsp;
                 <input
                     type="number"
                     id="columns"
@@ -354,9 +365,7 @@ function StaggeredOptions(props: Options) {
                     style={{width: "4em"}}
                     onChange={(e) => props.setColumns(parseInt(e.currentTarget.value))}
                 />
-                &nbsp;&nbsp;&nbsp;
                 <label for="horizontalGap">Horizontal Gap : </label>
-                &nbsp;&nbsp;
                 <input
                     type="number"
                     id="horizontalGap"
@@ -365,9 +374,7 @@ function StaggeredOptions(props: Options) {
                     style={{width: "4em"}}
                     onChange={(e) => props.setHorizontalGap(parseInt(e.currentTarget.value))}
                 />
-                &nbsp;&nbsp;&nbsp;
                 <label for="verticalGap">Vertical Gap : </label>
-                &nbsp;&nbsp;
                 <input
                     type="number"
                     id="verticalGap"
@@ -376,14 +383,10 @@ function StaggeredOptions(props: Options) {
                     style={{width: "4em"}}
                     onChange={(e) => props.setVerticalGap(parseInt(e.currentTarget.value))}
                 />
-                &nbsp;&nbsp;&nbsp;
                 <label for="fitHorizontalGap">Fit Horizontal Gap : </label>
-                &nbsp;&nbsp;
                 <input type={"checkbox"} checked={props.fitHorizontalGap()}
                        onChange={(e) => props.setFitHorizontalGap(e.currentTarget.checked)}/>
-                &nbsp;&nbsp;&nbsp;
                 <label for="infiniteGrid">Infinite Grid : </label>
-                &nbsp;&nbsp;
                 <input type={"checkbox"} checked={props.infiniteGrid()}
                        onChange={(e) => props.setInfiniteGrid(e.currentTarget.checked)}/>
             </div>
