@@ -1,8 +1,8 @@
-const ghpages = require("gh-pages")
+import ghpages from "gh-pages"
 
-ghpages.publish('build', {
+ghpages.publish('dist/public', {
     branch: 'gh-pages',
-    repo: 'https://github.com/wakaztahir/react-staggered-grid.git'
+    repo: 'https://github.com/wakaztahir/solid-staggered-grid.git'
 }, () => {
     console.log("Package Github Pages published")
 });

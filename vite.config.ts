@@ -1,11 +1,12 @@
 import solid from 'solid-start/vite'
-import nodeStart from 'solid-start-node'
+import staticSolid from 'solid-start-static'
 import { defineConfig } from 'vite'
 import {resolve} from "path";
 
 export default defineConfig(() => {
   return {
-    plugins: [solid({ adapter: nodeStart(), ssr : true })],
+    base : "/solid-staggered-grid",
+    plugins: [solid({ adapter: staticSolid(), ssr : true })],
     resolve: {
       alias: {
         "solid-staggered-grid": resolve(__dirname, "./lib/src")
