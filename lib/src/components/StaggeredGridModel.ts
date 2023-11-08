@@ -95,7 +95,7 @@ export type ElemProps<T extends ValidComponent, P = ComponentProps<T>> = {
     [K in keyof P]: P[K];
 }
 
-export type StaggeredGridItemProps<T extends ValidComponent = "div"> = ElemProps<T> & {
+export type StaggeredGridItemProps<T extends ValidComponent> = {
     /** type of html element used , by default 'div' */
     elementType?: T,
     /** initial position of the item on the grid , default 0 for everything */
@@ -110,7 +110,6 @@ export type StaggeredGridItemProps<T extends ValidComponent = "div"> = ElemProps
     style?: JSX.CSSProperties | undefined,
     /** children of the item */
     children?: JSXElement,
-
     /** transform the positioned item to html props for the StaggeredGridItem , by default uses css properties like left,top & position:absolute */
-    transform?(itemPos: PositionedItem): JSX.HTMLAttributes<T>
+    transform?(itemPos: PositionedItem | undefined): JSX.HTMLAttributes<T>
 }

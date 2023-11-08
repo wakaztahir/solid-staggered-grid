@@ -1,30 +1,24 @@
 import {useStaggeredGrid} from "./StaggeredGridContext";
-import {StaggeredGridItemProps} from "./StaggeredGridModel";
-import {createEffect, createSignal, JSX, onCleanup} from "solid-js";
+import {ElemProps, StaggeredGridItemProps} from "./StaggeredGridModel";
+import {createEffect, createSignal, JSX, onCleanup, ValidComponent} from "solid-js";
 import {Dynamic} from "solid-js/web";
 
-export function useStaggeredGridItemProps(props: StaggeredGridItemProps): () => JSX.HTMLAttributes<HTMLElement> {
+export function useStaggeredGridItemProps<T extends ValidComponent = "div">(props: StaggeredGridItemProps<T>): () => JSX.HTMLAttributes<T> {
 
     const context = useStaggeredGrid()
 
-    const [state, setState] = createSignal(props.initialPosition || {
-        left: 0,
-        top: 0,
-        width: 0,
-        animateTo: false
-    })
+    const [state, setState] = createSignal(props.initialPosition)
 
     let itemElementRef: HTMLElement | undefined = undefined
 
     function updateTranslate(width: number, x: number, y: number) {
         const position = state()
-        if (position.width !== width || x !== position.left || y !== position.top) {
-            const animateTo = position.left != 0 || position.top != 0
+        if (position == null || position.width !== width || x !== position.left || y !== position.top) {
             const NewPos = {
                 width: width,
                 left: x,
                 top: y,
-                animateTo: animateTo
+                animateTo: position != null
             }
             // console.log("Received", position.top,position.left,position.width,position.animateTo, NewPos, animateTo)
             setState(NewPos)
@@ -51,7 +45,6 @@ export function useStaggeredGridItemProps(props: StaggeredGridItemProps): () => 
         delete elemProps.itemHeight
         delete elemProps.spans
         delete elemProps.index
-        delete elemProps.style
         delete elemProps.children
         delete elemProps.transform
         if (props.transform != null) {
@@ -59,6 +52,9 @@ export function useStaggeredGridItemProps(props: StaggeredGridItemProps): () => 
                 ...elemProps,
                 ...props.transform(itemPos)
             }
+        }
+        if(itemPos == null) {
+            return elemProps
         }
         const animateProp: JSX.CSSProperties = itemPos.animateTo ? ({
             transition: "top, left 0.3s ease"
@@ -71,7 +67,7 @@ export function useStaggeredGridItemProps(props: StaggeredGridItemProps): () => 
                 left: itemPos.left + "px",
                 top: itemPos.top + "px",
                 ...animateProp,
-                ...props.style
+                ...(props.style || {})
             }
         }
     }
@@ -87,7 +83,7 @@ export function useStaggeredGridItemProps(props: StaggeredGridItemProps): () => 
 
 }
 
-export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements>(props: StaggeredGridItemProps<T>) {
+export function StaggeredGridItem<T extends ValidComponent = "div">(props: StaggeredGridItemProps<T> & ElemProps<T>) {
 
     const itemProps = useStaggeredGridItemProps(props)
 

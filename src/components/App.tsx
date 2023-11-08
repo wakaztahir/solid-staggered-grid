@@ -209,8 +209,7 @@ function StaggeredTestItem(props: StaggeredTestItemProps) {
     const itemProps = useStaggeredGridItemProps({
         index: props.index,
         spans: span(),
-        itemHeight: height(),
-        style : {}
+        itemHeight: height()
     })
 
     return (
