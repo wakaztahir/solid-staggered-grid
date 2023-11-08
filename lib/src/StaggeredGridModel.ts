@@ -89,12 +89,6 @@ export interface StaggeredGridProps<T extends keyof JSX.IntrinsicElements = "div
     gridController?: StaggeredGridController | undefined,
 }
 
-//Staggered Grid Item Model
-
-export type ElemProps<T extends ValidComponent, P = ComponentProps<T>> = {
-    [K in keyof P]: P[K];
-}
-
 export type StaggeredGridItemProps<T extends ValidComponent> = {
     /** type of html element used , by default 'div' */
     elementType?: T,

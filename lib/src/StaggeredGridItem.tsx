@@ -1,9 +1,9 @@
 import {useStaggeredGrid} from "./StaggeredGridContext";
-import {ElemProps, StaggeredGridItemProps} from "./StaggeredGridModel";
-import {createEffect, createSignal, JSX, onCleanup, ValidComponent} from "solid-js";
+import {StaggeredGridItemProps} from "./StaggeredGridModel";
+import {createEffect, createSignal, JSX, onCleanup} from "solid-js";
 import {Dynamic} from "solid-js/web";
 
-export function useStaggeredGridItemProps<T extends ValidComponent = "div">(props: StaggeredGridItemProps<T>): () => JSX.HTMLAttributes<T> {
+export function useStaggeredGridItemProps<T extends keyof JSX.IntrinsicElements = "div">(props: StaggeredGridItemProps<T>): () => JSX.HTMLAttributes<T> {
 
     const context = useStaggeredGrid()
 
@@ -53,7 +53,7 @@ export function useStaggeredGridItemProps<T extends ValidComponent = "div">(prop
                 ...props.transform(itemPos)
             }
         }
-        if(itemPos == null) {
+        if (itemPos == null) {
             return elemProps
         }
         const animateProp: JSX.CSSProperties = itemPos.animateTo ? ({
@@ -75,19 +75,22 @@ export function useStaggeredGridItemProps<T extends ValidComponent = "div">(prop
     return () => ({
 
         ...transform(),
-        onLoad: reportData,
-        ref: props.itemHeight == null ? itemElementRef : undefined,
 
+        onLoad: reportData,
+
+        // @ts-ignore
+        ref: props.itemHeight == null ? itemElementRef : undefined,
 
     })
 
 }
 
-export function StaggeredGridItem<T extends ValidComponent = "div">(props: StaggeredGridItemProps<T> & ElemProps<T>) {
+export function StaggeredGridItem<T extends keyof JSX.IntrinsicElements = "div">(props: StaggeredGridItemProps<T> & JSX.IntrinsicElements[T]) {
 
     const itemProps = useStaggeredGridItemProps(props)
 
     return (
+        // @ts-ignore
         <Dynamic
             component={props.elementType || "div"}
             {...itemProps()}

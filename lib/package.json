@@ -2,37 +2,91 @@
   "name": "solid-staggered-grid",
   "version": "1.0.18",
   "description": "Staggered Grid for Solid JS",
-  "files": [
-    "dist"
-  ],
-  "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "clean": "rimraf dist",
-    "build": "npm run clean && rollup -c"
+  "author": "Waqas Tahir",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wakaztahir/solid-staggered-grid.git"
   },
+  "homepage": "https://wakaztahir.github.io/solid-staggered-grid",
   "keywords": [
     "solid",
     "staggered",
     "grid",
     "masonry"
   ],
-  "author": "Waqas Tahir",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/wakaztahir/solid-staggered-grid.git"
+  "files": [
+    "dist/**"
+  ],
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "node -e \"if(require('fs').existsSync('dist')) require('fs').rmSync('dist', { recursive : true })\"",
+    "types": "tsc --declaration --emitDeclarationOnly --declarationDir dist",
+    "build": "yarn run clean && rollup -c rollup.config.js && yarn run types"
   },
-  "homepage": "https://wakaztahir.github.io/solid-staggered-grid",
-  "license": "ISC",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.7",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-typescript": "^11.1.5",
+    "@babel/preset-typescript": "^7.23.0",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-node-resolve": "^15.2.2",
+    "@rollup/plugin-terser": "^0.4.4",
+    "babel-preset-solid": "^1.7.12",
     "rimraf": "^5.0.5",
-    "rollup": "^4.3.0",
-    "rollup-plugin-dts": "^6.1.0",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-terser": "^7.0.2",
+    "rollup": "^4.0.0",
     "typescript": "^5.2.2"
+  },
+  "browser": {
+    "./dist/server.cjs": "./dist/index.cjs",
+    "./dist/server.js": "./dist/index.js"
+  },
+  "exports": {
+    "worker": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/server.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/server.cjs"
+      }
+    },
+    "browser": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "deno": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/server.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/server.cjs"
+      }
+    },
+    "node": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/server.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/server.cjs"
+      }
+    },
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    }
   }
 }
